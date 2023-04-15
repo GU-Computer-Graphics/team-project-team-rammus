@@ -200,26 +200,26 @@
             side: THREE.DoubleSide
          });
          let midMat = new THREE.MeshPhongMaterial({
-            color: new THREE.Color("black"),
+            color: new THREE.Color("red"),
             specular: new THREE.Color("white"),
-            shininess: 12,
+            shininess: 30,
             flatShading: THREE.FlatShading,
             side: THREE.DoubleSide
          });
          
          // adjust positions on geom to allow for easy rotation
          plateGeom.translate(0,p.bodyHeight * (0.5 + p.baseHeightRatio),p.bodyWidth);
-         midGeom.translate(0,p.bodyHeight * (0.5 + p.baseHeightRatio),p.bodyWidth);
+         midGeom.translate(0,p.bodyHeight * (0.5 + p.baseHeightRatio),p.bodyWidth * 1.1);
          
          // create meshes
          let topRightMesh = new THREE.Mesh(plateGeom, shieldMat);
          let topLeftMesh = topRightMesh.clone();
-         
+         let midMesh = new THREE.Mesh(midGeom, midMat);
          // adjust positions
          topLeftMesh.rotateY(1);
-         
+         midMesh.rotateY(0.5);
          shield.add(topRightMesh);
-         shield.add(topLeftMesh);
+         shield.add(topLeftMesh); shield.add(midMesh);
          return shield;
       }
       
