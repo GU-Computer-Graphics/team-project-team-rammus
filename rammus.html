@@ -55,40 +55,43 @@
       }
       
       var turretParams = {
+         // overall
          positionX: 0,
          positionY: 0,
          positionZ: 0,
          scaleY: 1,
          rotation: 0,
-         headSize: 15,
-         bodyHeight: 100,
-         bodyWidth: 10,
-         baseHeightRatio: 0.1,
-         baseWidthRatio: 1.2,
-         turretColor: new THREE.Color(0xAAAAAF)
+         
+         // body
+         headSize: 40,
+         bodyHeight: 150,
+         bodyWidth: 30,
+         baseHeightRatio: 0.25,
+         baseWidthRatio: 1.4,
+         
+         // shield
+         shieldHeight: 60,
+         shieldWidth: 4,
+         shieldLength: 30,
+         
+         // colors
+         turretColor: new THREE.Color(0x99999F),
+         turretMastColor: new THREE.Color(0xAAAAAF)
       }
       
       var state = {};
-      // colors and materials for the clown
-      var clownMaterials = [
-         new THREE.MeshBasicMaterial({ color: 0x8822BB }),  // 0 - purple
-         new THREE.MeshBasicMaterial({ color: 0x22CC22 }),  // 1 - green
-         new THREE.MeshBasicMaterial({ color: 0xE59B7D }),  // 2 - skin
-         new THREE.MeshBasicMaterial({ color: 0x000000 }),  // 3 - black
-         new THREE.MeshBasicMaterial({ color: 0xEEEEEE }),  // 4 - off white
-         new THREE.MeshBasicMaterial({ color: 0xFFFF00 })   // 5 - yellow
-      ];
+      
+      var rammusParams = {
+         positionX: 100,
+         positionY: 10,
+         positionZ: 100,
+         height: 16,
+         width: 14
+      }
 
       // Animations Specific Varaibles
-      
-      var taurusPosition = {
-            x: 0,
-            y: 10,
-            z: 0,
-        }
       const rotationDegree = 5;
       var startingPosition = new THREE.Object3D();
-      var taurus = new THREE.Object3D();
       var path = [];
       var tMax = 1000; 
       var t = 0;   
@@ -141,7 +144,7 @@
          // create parts
          let headGeom = new THREE.SphereGeometry(p.headSize, 32, 32);
          let mastGeom = new THREE.CylinderGeometry(p.bodyWidth, p.bodyWidth, p.bodyHeight);
-         let baseGeom = new THREE.CylinderGeometry(p.bodyWidth, p.bodyWidth, p.bodyHeight/10);
+         let baseGeom = new THREE.CylinderGeometry(p.bodyWidth, p.bodyWidth * p.baseWidthRatio, p.bodyHeight * p.baseHeightRatio);
          
          // create materials
          let turretMat = new THREE.MeshPhongMaterial({
@@ -152,12 +155,23 @@
             side: THREE.DoubleSide
          });
          
+         let turretMastMat = new THREE.MeshPhongMaterial({
+            color: p.turretMastColor,
+            specular: new THREE.Color("white"),
+            shininess: 10,
+            flatShading: THREE.FlatShading,
+            side: THREE.DoubleSide
+         });
+         
          // create meshes
          let headMesh = new THREE.Mesh(headGeom, turretMat);
-         let mastMesh = new THREE.Mesh(mastGeom, turretMat);
+         let mastMesh = new THREE.Mesh(mastGeom, turretMastMat);
          let baseMesh = new THREE.Mesh(baseGeom, turretMat);
          
          // adjust positions
+         headMesh.position.y += (p.bodyHeight * (1 + p.baseHeightRatio) + p.headSize * 0.3);
+         mastMesh.position.y += (p.bodyHeight * (0.5 + p.baseHeightRatio))
+         baseMesh.position.y += p.bodyHeight * p.baseHeightRatio * 0.5;
          
          // add meshes to scene
          body.add(headMesh);
@@ -168,9 +182,44 @@
       }
       
       function createShield(turretParams) {
+         // use alias
+         let p = turretParams;
+         
          let shield = new THREE.Object3D();
          
+         // create parts
+         let plateGeom = new THREE.BoxGeometry(p.shieldLength, p.shieldHeight, p.shieldWidth);
+         let midGeom = new THREE.CylinderGeometry(p.shieldWidth * 0.6, p.shieldWidth * 0.6, p.shieldHeight);
          
+         // create mats
+         let shieldMat = new THREE.MeshPhongMaterial({
+            color: p.turretColor,
+            specular: new THREE.Color("white"),
+            shininess: 12,
+            flatShading: THREE.FlatShading,
+            side: THREE.DoubleSide
+         });
+         let midMat = new THREE.MeshPhongMaterial({
+            color: new THREE.Color("black"),
+            specular: new THREE.Color("white"),
+            shininess: 12,
+            flatShading: THREE.FlatShading,
+            side: THREE.DoubleSide
+         });
+         
+         // adjust positions on geom to allow for easy rotation
+         plateGeom.translate(0,p.bodyHeight * (0.5 + p.baseHeightRatio),p.bodyWidth);
+         midGeom.translate(0,p.bodyHeight * (0.5 + p.baseHeightRatio),p.bodyWidth);
+         
+         // create meshes
+         let topRightMesh = new THREE.Mesh(plateGeom, shieldMat);
+         let topLeftMesh = topRightMesh.clone();
+         
+         // adjust positions
+         topLeftMesh.rotateY(1);
+         
+         shield.add(topRightMesh);
+         shield.add(topLeftMesh);
          return shield;
       }
       
@@ -220,9 +269,9 @@
          state.scene.add(groundMesh);
       }
 
-      function moveTaurusFoward() {
-            t += 1
-            //for debugging and... a big hint
+      function moveRammusFoward() {
+            t += 1;
+
             console.log((t));
             console.log((path[t].x + ", " + path[t].y + ", " + path[t].z));
 
@@ -230,22 +279,22 @@
             let targetDirection = new THREE.Vector3(path[t].x, path[t].y, path[t].z);
 
             let position = new THREE.Vector3(); //need a vector to store a position
-            taurus.getWorldPosition(position); //get car current position -- getWorldPosition requires target return object
-            let distance = position.distanceTo(targetDirection); //calculate distance between car and point we want to move towards            
+            state.rammus.getWorldPosition(position); 
+            let distance = position.distanceTo(targetDirection);       
             // console.log("distance: " + distance);
-            taurus.lookAt(targetDirection); //"rotate" car to face the point we'll move towards
-            taurus.translateZ(distance); //move to the new position (Z because that is the "forward" direction according to how we built the car)
+            state.rammus.lookAt(targetDirection);
+            state.rammus.translateZ(distance);
 
             render(); //update scene
       }
 
       function animate(timestamp) {
-            if(t <tMax) {
-                moveTaurusFoward()
-                animationId = requestAnimationFrame(animate)
+            if(t < tMax) {
+                moveRammusFoward();
+                animationId = requestAnimationFrame(animate);
             }
             else {
-                stopAnimation()
+                stopAnimation();
             }
       }
 
@@ -287,6 +336,18 @@
             }
             return geometry;
       };
+      
+      function createRammus(rammusParams) {
+         var rammus = new THREE.Object3D();
+         
+         var taurGeom = new THREE.TorusGeometry( rammusParams.height, rammusParams.width, 16, 100 );
+         var taurMesh = new THREE.Mesh(taurGeom, new THREE.MeshPhongMaterial( { color: 0xB2B200 } ));
+         taurMesh.rotation.y = deg2rad(90);
+         taurMesh.translateY(rammusParams.height);
+         
+         rammus.add(taurMesh);
+         return rammus;
+      }
 
       // setupCamera() function creates and returns a camera with the desired parameters
       function setupCamera(cameraParameters) {
@@ -323,6 +384,9 @@
       function redraw() {
          
          // adjust things to new values
+         scene.remove(turret);
+         turret = createTurret(turretParams);
+         scene.add(turret);
          
          render();
       }
@@ -351,14 +415,14 @@
       
       // add things to the scene
       addBackground(bgParams, state);
-
-      var taurGeom = new THREE.TorusGeometry( 10, 3, 16, 100 )
-      var taurMesh = new THREE.Mesh( taurGeom,new THREE.MeshBasicMaterial( { color: 0xffff00 } ))
-      taurMesh.rotation.y = THREE.Math.degToRad(90)
-      taurMesh.translateY(10)
-      taurus.add(taurMesh)
-      scene.add(taurus)
-      startingPosition.position.copy(taurus.position);
+      
+      var rammus = createRammus(rammusParams);
+      state.rammus = rammus;     // save this so animation can use it
+      startingPosition.position.copy(rammus.position);
+      rammus.position.x = rammusParams.positionX;
+      rammus.position.y = rammusParams.positionY;
+      rammus.position.z = rammusParams.positionZ;
+      scene.add(rammus);
 
       var curveGeom = createBezierCurve(controlPoints, tMax);
       var curveMat = new THREE.LineBasicMaterial({
@@ -367,9 +431,10 @@
       });
       var curve = new THREE.Line(curveGeom, curveMat);
       scene.add(curve);
-      scene.add(createTurret(turretParams));
       
-      // camera overhead
+      var turret = createTurret(turretParams);
+      scene.add(turret);
+      
       var camera = setupCamera(cameraParams);
       
       render();
@@ -416,21 +481,15 @@
                     redoCamera();
                     break;
                 case "g":
-                    //TODO: it may be helpful if you try to move one step 
-                    //      at a time first before animating the whole curve
-                    // no changes required here, just a hopefully helpful thought
-                    t = 0
+                    t = 0;
                     animate();
                     break;
                 case " ":
                     stopAnimation();
                     break;
-                case "0":
-                    //move the car back to the starting position (variable set at the start)
-                    taurus.position.set(startingPosition.position.x, startingPosition.position.y, startingPosition.position.z);
-                    //TODO: take note of the lookAt function, this rotates the car to look at the origin.
-                    //How is this be helpful? Is this where we want to orient the car? What happens if we don't do this?
-                    taurus.lookAt(new THREE.Vector3(0, 0, 0));
+                case "0":                   
+                    state.rammus.position.set(startingPosition.position.x, startingPosition.position.y, startingPosition.position.z);
+                    state.rammus.lookAt(new THREE.Vector3(0, 0, 0));
                     t = 0; //reset to start over
                     break;
                 default:
