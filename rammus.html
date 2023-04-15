@@ -2,33 +2,61 @@
 <html lang="en">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <title>Rammus</title>
-    <style>
-        canvas {
-            display: block;
-            margin: 10px auto;
-            width: 80%;
-            height: 600px;
-        }
-    </style>
+   <title>Rammus</title>
+   <style>
+      canvas {
+      display: block;
+      margin: 10px auto;
+      width: 800px;
+      height: 500px;
+      }
+   </style>
 
-    <script src="./js/three.js"></script>
-    <script src="./js/OrbitControls.js"></script>
-    <script src="./js/SceneUtils.js"></script>
-    <script src="js/dat.gui.js"></script>
-
+   <script src="./js/three.js"></script>
+   <script src="./js/OrbitControls.js"></script>
+   <script src="./js/SceneUtils.js"></script>
+   <script src="js/dat.gui.js"></script>
+   
 </head>
 
 <body>
-   <h1><center>Rammus</center></h1>
-   <script id="teddyclowncode">
+   <h1><center>Rammus Roll</center></h1>
+   <script id="rammuscode">
+   
+/*************************************************
 
-      // parameters that specify the geometrical structure of the clown
+      global variables
+      
+*************************************************/
+
+      // parameters used in the scene
+      var cameraParams = {
+         near: 1,
+         far: 1000,
+         fov: 55, // degrees
+         aspectRatio: 800 / 500, // from dimensions of the canvas, see CSS
+         atX: 0,
+         atY: 0,
+         atZ: 0,
+         eyeX: 0,
+         eyeY: 40,
+         eyeZ: 150,
+         upX: 0,
+         upY: 1,
+         upZ: 0
+      };
+      
+      var bgParams = {
+         groundColor1: new THREE.Color(0xC2B48C),
+         groundColor2: new THREE.Color(0x427646),
+         groundSize: 500
+      }
+      
       var params = {
          noseRadius: 0.5,
-         noseRotation: TW.degrees2radians(10),
+         noseRotation: deg2rad(10),
          earRadius: 2,
          earScale: 1,
          earAngle: Math.PI / 12,
@@ -45,8 +73,8 @@
          legRadiusTop: 1.8,
          legRadiusBottom: 1.4,
          legLength: 20,
-         legRotationX: 0,
-         legRotationZ: 0,
+         legRotationX: -deg2rad(0),
+         legRotationZ: deg2rad(5),
          hipWidth: 3.5,
          hipHeight: -7,
          headRadius: 5,
@@ -56,20 +84,33 @@
          hatRadiusOuter: 8,
          hatHeight: 6,
          positionX: 0,
+         positionY: 25,
          positionZ: 0,
          rotation: 0,
          orbRadius: 1
       };
-
+      
+      var state = {};
+      
       // colors and materials for the clown
       var clownMaterials = [
          new THREE.MeshBasicMaterial({ color: 0x8822BB }),  // 0 - purple
          new THREE.MeshBasicMaterial({ color: 0x22CC22 }),  // 1 - green
          new THREE.MeshBasicMaterial({ color: 0xE59B7D }),  // 2 - skin
          new THREE.MeshBasicMaterial({ color: 0x000000 }),  // 3 - black
-         new THREE.MeshBasicMaterial({ color: 0xFFFFFF }),  // 4 - white
+         new THREE.MeshBasicMaterial({ color: 0xEEEEEE }),  // 4 - off white
          new THREE.MeshBasicMaterial({ color: 0xFFFF00 })   // 5 - yellow
       ];
+      
+/*************************************************
+
+      functions
+      
+*************************************************/
+
+      function deg2rad(degrees) {
+         return degrees * 0.0174533;
+      }
       
       function createHat(params) {
          // make a frame for hat parts
@@ -308,7 +349,45 @@
          hat.rotateX(-0.1);
          hat.rotateZ(-0.1);
          clown.add(hat);
+         clown.position.y = params.positionY;
          return clown;
+      }
+      
+      function createBackground(bgParams, state) {
+         let p = bgParams;
+         
+         var groundGeom = new THREE.PlaneGeometry(p.groundSize, p.groundSize);
+         groundGeom.vertexColors = [p.groundColor2,p.groundColor1,p.groundColor1,p.groundColor2];
+         
+         // color interpolation algorithm sourced from tw script
+         var colors = groundGeom.vertexColors;
+         var i, faces = groundGeom.faces, len = faces.length;
+
+         for (i = 0; i < len; ++i) {
+            var face = faces[i];
+            var facecolors = [];
+            facecolors[0] = colors[face.a];
+            facecolors[1] = colors[face.b];
+            facecolors[2] = colors[face.c];
+            face.vertexColors = facecolors;
+         }
+         var groundMesh = new THREE.Mesh(
+            groundGeom,
+            new THREE.MeshPhongMaterial({
+                vertexColors: THREE.VertexColors,
+                specular: new THREE.Color("white"),
+                shininess: 10,
+                flatShading: THREE.FlatShading,
+                side: THREE.DoubleSide
+                //map: groundTexture //TODO: can temporarily comment out to see without local server
+            }));
+         groundMesh.rotateX(deg2rad(90));
+         
+         // add ambient light source
+         var ambLight = new THREE.AmbientLight(new THREE.Color("white"), 0.9);
+         state.scene.add(ambLight);
+         
+         state.scene.add(groundMesh);
       }
       
       function createOrb(params) {
@@ -320,45 +399,89 @@
          return orbMesh;
       }
 
-      // construct a renderer for the scene
-      var renderer = new THREE.WebGLRenderer();
+      // setupCamera() function creates and returns a camera with the desired parameters
+      function setupCamera(cameraParameters) {
+         // set up an abbreviation 
+         let cp = cameraParameters;
+         // create an initial camera with the desired shape
+         var camera = new THREE.PerspectiveCamera(cp.fov, cp.aspectRatio, cp.near, cp.far);
+         // set the camera location and orientation
+         camera.position.set(cp.eyeX, cp.eyeY, cp.eyeZ);
+         camera.up.set(cp.upX, cp.upY, cp.upZ);
+         camera.lookAt(new THREE.Vector3(cp.atX, cp.atY, cp.atZ));
+         return camera;
+      }
 
-      // create the Scene object
-      var scene = new THREE.Scene();
+      function redoCamera() {
+         scene.remove(camera);
+         camera = setupCamera(cameraParams);
+         scene.add(camera)
+         render();
+      }
 
-      // create a clown and add it to the scene
-      var clown = createClown(params);
-      scene.add(clown);
-      scene.add(createOrb(params));
+      function render() {
+         // a render function; assume global variables scene, renderer, and camera
+         renderer.render(scene, camera);
+      }
 
-      TW.mainInit(renderer, scene);
-
-      TW.cameraSetup(renderer,
-         scene,
-         {
-            minx: -10, maxx: 10,
-            miny: -10, maxy: 15,
-            minz: -10, maxz: 10
-         });
+      function setupCameraControls() {
+         var cameraControls = new THREE.OrbitControls(camera, canvas);
+         state.cameraControls = cameraControls;
+         cameraControls.addEventListener('change', render);
+         cameraControls.update();
+      }
          
       function redraw() {
          scene.remove(clown);
          clown = createClown(params)
          clown.position.x = params.positionX;
+         clown.position.y = params.positionY;
          clown.position.z = params.positionZ;
          clown.rotateY(params.rotation);
          scene.add(clown);
-         TW.render();
+         render();
       }
+      
+      
+/*************************************************
 
-       var gui = new dat.GUI();
-       gui.add(params, 'positionX', -20, 20).onChange(redraw);
-       gui.add(params, 'positionZ', -20, 20).onChange(redraw);
-       gui.add(params, 'rotation', -Math.PI*2, Math.PI*2).onChange(redraw);
-       gui.add(params, 'hatHeight', 1, 20).onChange(redraw);
+      "main" area
+      
+*************************************************/
+      
+      // construct a renderer for the scene
+      var renderer = new THREE.WebGLRenderer();
+      
+      // create the Scene object
+      var scene = new THREE.Scene();
+      
+      // add canvas to the document
+      var canvas = renderer.domElement;
+      state.renderer = renderer; // save this so that others can use it.
+      state.scene = scene;       // save this so that others can use it.
+      var parent = document.body;
+      parent.appendChild(canvas);
+      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+      renderer.setClearColor(new THREE.Color(0xfefefe), 1);
+      
+      // create a clown and add it to the scene
+      var clown = createClown(params);
+      scene.add(clown);
+      scene.add(createOrb(params));
+      createBackground(bgParams, state);
+      
+      // camera overhead
+      var camera = setupCamera(cameraParams);
+      
+      render();
+      setupCameraControls();
+
+      var gui = new dat.GUI();
+      gui.add(params, 'positionX', -20, 20).onChange(redraw);
+      gui.add(params, 'positionZ', -20, 20).onChange(redraw);
+      gui.add(params, 'rotation', -Math.PI*2, Math.PI*2).onChange(redraw);
+      gui.add(params, 'hatHeight', 1, 20).onChange(redraw);
        
-
-      TW.viewFromAboveFrontSide();
 
     </script>
     <!-- <canvas width="2156" height="600" style="width: 2156px; height: 600px;"></canvas> -->
