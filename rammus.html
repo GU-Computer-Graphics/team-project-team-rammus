@@ -64,12 +64,9 @@
          bodyHeight: 100,
          bodyWidth: 10,
          baseHeightRatio: 0.1,
-         baseWidthRatio: 1.2
+         baseWidthRatio: 1.2,
+         turretColor: new THREE.Color(0xAAAAAF)
       }
-      
-      var params = {
-         orbRadius: 1
-      };
       
       var state = {};
       // colors and materials for the clown
@@ -142,9 +139,30 @@
          let body = new THREE.Object3D();
          
          // create parts
-         let head = new THREE.SphereGeometry(p.headSize, 32, 32);
-         let mast = new THREE.CylinderGeometry(p.bodyWidth, p.bodyWidth, p.bodyHeight);
-         let base = new THREE.CylinderGeometry(p.bodyWidth, p.bodyWidth, p.bodyHeight/10);
+         let headGeom = new THREE.SphereGeometry(p.headSize, 32, 32);
+         let mastGeom = new THREE.CylinderGeometry(p.bodyWidth, p.bodyWidth, p.bodyHeight);
+         let baseGeom = new THREE.CylinderGeometry(p.bodyWidth, p.bodyWidth, p.bodyHeight/10);
+         
+         // create materials
+         let turretMat = new THREE.MeshPhongMaterial({
+            color: p.turretColor,
+            specular: new THREE.Color("white"),
+            shininess: 10,
+            flatShading: THREE.FlatShading,
+            side: THREE.DoubleSide
+         });
+         
+         // create meshes
+         let headMesh = new THREE.Mesh(headGeom, turretMat);
+         let mastMesh = new THREE.Mesh(mastGeom, turretMat);
+         let baseMesh = new THREE.Mesh(baseGeom, turretMat);
+         
+         // adjust positions
+         
+         // add meshes to scene
+         body.add(headMesh);
+         body.add(mastMesh);
+         body.add(baseMesh);
          
          return body;
       }
@@ -200,15 +218,6 @@
          state.scene.add(ambLight);
          
          state.scene.add(groundMesh);
-      }
-      
-      function createOrb(params) {
-         var orbGeom = new THREE.CylinderGeometry(params.orbRadius);
-         var orbMesh = new THREE.Mesh(orbGeom, clownMaterials[5]);
-         orbMesh.position.x = 0;
-         orbMesh.position.y = 0;
-         orbMesh.position.z = 0;
-         return orbMesh;
       }
 
       function moveTaurusFoward() {
@@ -314,7 +323,7 @@
       function redraw() {
          
          // adjust things to new values
-
+         
          render();
       }
       
@@ -341,9 +350,7 @@
       renderer.setClearColor(new THREE.Color(0xfefefe), 1);
       
       // add things to the scene
-      scene.add(createOrb(params));
       addBackground(bgParams, state);
-
 
       var taurGeom = new THREE.TorusGeometry( 10, 3, 16, 100 )
       var taurMesh = new THREE.Mesh( taurGeom,new THREE.MeshBasicMaterial( { color: 0xffff00 } ))
@@ -360,6 +367,7 @@
       });
       var curve = new THREE.Line(curveGeom, curveMat);
       scene.add(curve);
+      scene.add(createTurret(turretParams));
       
       // camera overhead
       var camera = setupCamera(cameraParams);
@@ -374,8 +382,8 @@
       gui.add(turretParams, 'rotation', -Math.PI*2, Math.PI*2).onChange(redraw);
       gui.add(turretParams, 'bodyHeight', 1, 200).onChange(redraw);
       gui.add(turretParams, 'bodyWidth', 1, 100).onChange(redraw);
-      gui.add(turretParams, 'bodyHeight', 1, 200).onChange(redraw);
-      gui.add(turretParams, 'bodyWidth', 1, 100).onChange(redraw);
+      gui.add(turretParams, 'baseHeightRatio', 0.05, 2).onChange(redraw);
+      gui.add(turretParams, 'baseWidthRatio', 0.05, 2).onChange(redraw);
        
 
       document.addEventListener("keypress", (event) => {
