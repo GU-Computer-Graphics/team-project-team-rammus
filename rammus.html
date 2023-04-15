@@ -54,6 +54,10 @@
          groundSize: 500
       }
       
+      var turretParams = {
+         
+      }
+      
       var params = {
          noseRadius: 0.5,
          noseRotation: deg2rad(10),
@@ -353,16 +357,47 @@
          return clown;
       }
       
-      function createBackground(bgParams, state) {
+      function createTurret(turretParams) {
+         let turret = new THREE.Object3D();
+         
+         // create the nested parts 
+         let body = createBody(turretParams);
+         let shield = createShield(turretParams);
+         let wand = createWand(turretParams);
+         
+         // add the parts to the whole
+         turret.add(body);
+         turret.add(shield);
+         turret.add(wand);
+         
+         // adjust whole
+         // TODO: POSITION, ROTATION, SIZE SCALING, ETC
+         
+         return turret;
+      }
+      
+      function createBody(turretParams) {
+      
+      }
+      
+      function createShield(turretParams) {
+      
+      }
+      
+      function createWand(turretParams) {
+      
+      }
+      
+      // add background stuff such as the ground, skies (TODO), ambient light.
+      function addBackground(bgParams, state) {
          let p = bgParams;
          
+         // create the ground
          var groundGeom = new THREE.PlaneGeometry(p.groundSize, p.groundSize);
          groundGeom.vertexColors = [p.groundColor2,p.groundColor1,p.groundColor1,p.groundColor2];
-         
          // color interpolation algorithm sourced from tw script
          var colors = groundGeom.vertexColors;
          var i, faces = groundGeom.faces, len = faces.length;
-
          for (i = 0; i < len; ++i) {
             var face = faces[i];
             var facecolors = [];
@@ -371,6 +406,8 @@
             facecolors[2] = colors[face.c];
             face.vertexColors = facecolors;
          }
+         
+         // create the mesh for the ground
          var groundMesh = new THREE.Mesh(
             groundGeom,
             new THREE.MeshPhongMaterial({
@@ -468,7 +505,7 @@
       var clown = createClown(params);
       scene.add(clown);
       scene.add(createOrb(params));
-      createBackground(bgParams, state);
+      addBackground(bgParams, state);
       
       // camera overhead
       var camera = setupCamera(cameraParams);
