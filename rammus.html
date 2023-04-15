@@ -72,7 +72,6 @@
       };
       
       var state = {};
-      
       // colors and materials for the clown
       var clownMaterials = [
          new THREE.MeshBasicMaterial({ color: 0x8822BB }),  // 0 - purple
@@ -82,6 +81,30 @@
          new THREE.MeshBasicMaterial({ color: 0xEEEEEE }),  // 4 - off white
          new THREE.MeshBasicMaterial({ color: 0xFFFF00 })   // 5 - yellow
       ];
+
+      // Animations Specific Varaibles
+      
+      var taurusPosition = {
+            x: 0,
+            y: 10,
+            z: 0,
+        }
+      const rotationDegree = 5;
+      var startingPosition = new THREE.Object3D();
+      var taurus = new THREE.Object3D();
+      var path = [];
+      var tMax = 1000; 
+      var t = 0;   
+      var startingPosition = new THREE.Object3D();
+
+      var animationId = null;
+      var controlPoints = [
+         [0, 0,-200],
+         [500, 0, 200],
+         [-500, 0, 200],
+         [0, 0, -200]
+      ];
+      
       
 /*************************************************
 
@@ -188,6 +211,74 @@
          return orbMesh;
       }
 
+      function moveTaurusFoward() {
+            t += 1
+            //for debugging and... a big hint
+            console.log((t));
+            console.log((path[t].x + ", " + path[t].y + ", " + path[t].z));
+
+            //get next point on the path of our bezier curve, we want to move towards it
+            let targetDirection = new THREE.Vector3(path[t].x, path[t].y, path[t].z);
+
+            let position = new THREE.Vector3(); //need a vector to store a position
+            taurus.getWorldPosition(position); //get car current position -- getWorldPosition requires target return object
+            let distance = position.distanceTo(targetDirection); //calculate distance between car and point we want to move towards            
+            // console.log("distance: " + distance);
+            taurus.lookAt(targetDirection); //"rotate" car to face the point we'll move towards
+            taurus.translateZ(distance); //move to the new position (Z because that is the "forward" direction according to how we built the car)
+
+            render(); //update scene
+      }
+
+      function animate(timestamp) {
+            if(t <tMax) {
+                moveTaurusFoward()
+                animationId = requestAnimationFrame(animate)
+            }
+            else {
+                stopAnimation()
+            }
+      }
+
+      function stopAnimation() {
+            if (animationId != null) {
+                cancelAnimationFrame(animationId);
+                console.log("Cancelled animation using " + animationId);
+            }
+      }
+
+      function showCP(cpList, radius) {
+            for (var i = 0; i < cpList.length; i++) {
+                scene.add(createPoint(cpList[i], radius));
+            }
+      };
+
+      function createBezierCurve(cpList, steps) {
+            // Using the given list of control points, returns a
+            // THREE.Geometry comprising 'steps' vertices, suitable for
+            // combining with a material and creating a THREE.Line out of.
+            var N = Math.round(steps) + 1 || tMax; // number of vertices
+
+            var geometry = new THREE.Geometry();
+            var curve = new THREE.CubicBezierCurve3();
+
+            var cp = cpList[0];
+            curve.v0 = new THREE.Vector3(cp[0], cp[1], cp[2]);
+            cp = cpList[1];
+            curve.v1 = new THREE.Vector3(cp[0], cp[1], cp[2]);
+            cp = cpList[2];
+            curve.v2 = new THREE.Vector3(cp[0], cp[1], cp[2]);
+            cp = cpList[3];
+            curve.v3 = new THREE.Vector3(cp[0], cp[1], cp[2]);
+
+            var j, stepSize = 1 / (N - 1);
+            for (j = 0; j < N; j++) {
+                geometry.vertices.push(curve.getPoint(j * stepSize));
+                path.push(curve.getPoint(j * stepSize));
+            }
+            return geometry;
+      };
+
       // setupCamera() function creates and returns a camera with the desired parameters
       function setupCamera(cameraParameters) {
          // set up an abbreviation 
@@ -252,6 +343,23 @@
       // add things to the scene
       scene.add(createOrb(params));
       addBackground(bgParams, state);
+
+
+      var taurGeom = new THREE.TorusGeometry( 10, 3, 16, 100 )
+      var taurMesh = new THREE.Mesh( taurGeom,new THREE.MeshBasicMaterial( { color: 0xffff00 } ))
+      taurMesh.rotation.y = THREE.Math.degToRad(90)
+      taurMesh.translateY(10)
+      taurus.add(taurMesh)
+      scene.add(taurus)
+      startingPosition.position.copy(taurus.position);
+
+      var curveGeom = createBezierCurve(controlPoints, tMax);
+      var curveMat = new THREE.LineBasicMaterial({
+         color: new THREE.Color("blue"),
+         linewidth: 3
+      });
+      var curve = new THREE.Line(curveGeom, curveMat);
+      scene.add(curve);
       
       // camera overhead
       var camera = setupCamera(cameraParams);
@@ -269,6 +377,60 @@
       gui.add(turretParams, 'bodyHeight', 1, 200).onChange(redraw);
       gui.add(turretParams, 'bodyWidth', 1, 100).onChange(redraw);
        
+
+      document.addEventListener("keypress", (event) => {
+            const key = event.key;
+            console.log("key pressed was " + key);
+            switch (key) {
+                case "1":
+                    cameraParams.eyeX = -250;
+                    cameraParams.eyeY = 100;
+                    cameraParams.eyeZ = 200;
+                    redoCamera();
+                    break;
+                case "2":
+                    cameraParams.eyeX = 0;
+                    cameraParams.eyeY = 30;
+                    cameraParams.eyeZ = -300;
+                    redoCamera();
+                    break;
+
+                case "3":
+                    cameraParams.eyeX = 0;
+                    cameraParams.eyeY = 60;
+                    cameraParams.eyeZ = 300;
+                    redoCamera();
+                    break;
+                case "4":
+                    cameraParams.eyeX = 250;
+                    cameraParams.eyeY = 260;
+                    cameraParams.eyeZ = 0;
+                    redoCamera();
+                    break;
+                case "g":
+                    //TODO: it may be helpful if you try to move one step 
+                    //      at a time first before animating the whole curve
+                    // no changes required here, just a hopefully helpful thought
+                    t = 0
+                    animate();
+                    break;
+                case " ":
+                    stopAnimation();
+                    break;
+                case "0":
+                    //move the car back to the starting position (variable set at the start)
+                    taurus.position.set(startingPosition.position.x, startingPosition.position.y, startingPosition.position.z);
+                    //TODO: take note of the lookAt function, this rotates the car to look at the origin.
+                    //How is this be helpful? Is this where we want to orient the car? What happens if we don't do this?
+                    taurus.lookAt(new THREE.Vector3(0, 0, 0));
+                    t = 0; //reset to start over
+                    break;
+                default:
+                    break;
+            }
+            setupCameraControls();
+            render();
+        });
 
     </script>
     <!-- <canvas width="2156" height="600" style="width: 2156px; height: 600px;"></canvas> -->
