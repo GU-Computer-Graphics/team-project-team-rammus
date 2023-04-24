@@ -73,6 +73,10 @@
          shieldHeight: 60,
          shieldWidth: 4,
          shieldLength: 30,
+
+         // jewel
+         jewelHeight: 30,
+         jewelWidth: 20,
          
          // colors
          turretColor: new THREE.Color(0x99999F),
@@ -224,6 +228,40 @@
       
       function createWand(turretParams) {
          let wand = new THREE.Object3D();
+         let wandBase = new THREE.Object3D();
+         let wandJewel = new THREE.Object3D();
+         let p = turretParams;
+
+         let cane = new THREE.CylinderGeometry(p.bodyWidth * .25,p.bodyWidth * .25, p.bodyHeight * .75);
+         let top = new THREE.CylinderGeometry(p.bodyWidth * .35, p.bodyWidth *.35, p.bodyHeight * .05);
+         let bottom = new THREE.CylinderGeometry(p.bodyWidth * .35, p.bodyWidth *.35, p.bodyHeight * .05);
+
+         let topJewel = new THREE.ConeGeometry(p.jewelWidth, p.jewelHeight * .5, 4);
+         let botJewel = new THREE.ConeGeometry(p.jewelWidth, p.jewelHeight * .5, 4);
+
+         let wandMat = new THREE.MeshPhongMaterial({
+            color: p.turretColor,
+            specular: new THREE.Color("white"),
+            shininess: 12,
+            flatShading: THREE.FlatShading,
+            side: THREE.DoubleSide
+         });
+
+         let goldMat = new THREE.MeshPhongMaterial({
+            color: new THREE.Color(0xFFD700),
+            specular: new THREE.Color("white"),
+            shininess: 12,
+            flatShading: THREE.FlatShading,
+            side: THREE.DoubleSide
+         });
+
+         let jewelMat = new THREE.MeshPhongMaterial({
+            color: new THREE.Color("red"),
+            specular: new THREE.Color("white"),
+            shininess: 70,
+            flatShading: THREE.FlatShading,
+            side: THREE.DoubleSide
+         });
          
          
          return wand;
