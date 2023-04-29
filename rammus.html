@@ -126,6 +126,7 @@
          let body = createBody(turretParams);
          let shield = createShield(turretParams);
          let wand = createWand(turretParams);
+         wand.position.set(-turretParams.bodyWidth * 1.5, turretParams.bodyHeight *.25, turretParams.bodyWidth)
          
          // add the parts to the whole
          turret.add(body);
@@ -232,6 +233,7 @@
          let wandJewel = new THREE.Object3D();
          let p = turretParams;
 
+         // Geometries
          let cane = new THREE.CylinderGeometry(p.bodyWidth * .25,p.bodyWidth * .25, p.bodyHeight * .75);
          let top = new THREE.CylinderGeometry(p.bodyWidth * .35, p.bodyWidth *.35, p.bodyHeight * .05);
          let bottom = new THREE.CylinderGeometry(p.bodyWidth * .35, p.bodyWidth *.35, p.bodyHeight * .05);
@@ -239,6 +241,7 @@
          let topJewel = new THREE.ConeGeometry(p.jewelWidth, p.jewelHeight * .5, 4);
          let botJewel = new THREE.ConeGeometry(p.jewelWidth, p.jewelHeight * .5, 4);
 
+        // Materials
          let wandMat = new THREE.MeshPhongMaterial({
             color: p.turretColor,
             specular: new THREE.Color("white"),
@@ -262,7 +265,31 @@
             flatShading: THREE.FlatShading,
             side: THREE.DoubleSide
          });
+
+         // Wand body meshs
+         caneMesh = new THREE.Mesh(cane, wandMat)
+         caneMesh.position.set(0, (p.bodyHeight*.75)/2, 0)
+         topMesh = new THREE.Mesh(top, goldMat)
+         topMesh.position.set(0, p.bodyHeight*.75, 0)
+         bottomMesh = new THREE.Mesh(bottom, wandMat)
+         bottomMesh.position.set(0, (p.bodyHeight*.05)/2, 0)
+
+         // Jewel Meshs
+         topJewelMesh = new THREE.Mesh(topJewel, jewelMat)
+         topJewelMesh.position.set(0, p.jewelHeight/2, 0)
+         botJewelMesh = new THREE.Mesh(botJewel, jewelMat)
+         botJewelMesh.rotateX(deg2rad(180))
          
+         // Add Wand Meshs
+         wand.add(caneMesh)
+         wand.add(topMesh)
+         wand.add(bottomMesh)
+
+         // Add jewel Meshs
+         wandJewel.add(topJewelMesh)
+         wandJewel.add(botJewelMesh)
+         wandJewel.position.set(0,p.bodyHeight*.85,0)
+         wand.add(wandJewel)
          
          return wand;
       }
