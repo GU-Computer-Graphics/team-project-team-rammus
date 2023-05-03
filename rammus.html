@@ -93,6 +93,13 @@
          width: 14
       }
 
+      var sunParams = {
+         positionX: 250,
+         positionY: 300,
+         positionZ: 250,
+         radius: 100
+      }
+
       // Animations Specific Varaibles
       const rotationDegree = 5;
       var path = [];
@@ -400,6 +407,37 @@
             }
             return geometry;
       };
+
+      function createSun() {
+         sunObj = new THREE.Object3D()
+         sun = new THREE.SphereGeometry(100, 32, 32)
+         sunMat = new THREE.MeshPhongMaterial({
+            color: 0xFFFF00, // yellow color
+            specular: 0xffffff, // white specular 
+            shininess: 50,
+            transparent: true,
+            opacity: 0.5
+         });
+
+
+         sunMesh = new THREE.Mesh(sun, sunMat)
+         sunMesh.position.set(250, 300, 250)
+         sunObj.add(sunMesh)
+         sunTarget = new THREE.Object3D();
+         circtarget = new THREE.SphereGeometry(100, 32, 32)
+         circtargetMat = new THREE.MeshPhongMaterial({
+            color: 0xffffff, // yellow color
+            specular: 0xffffff, // white specular 
+            shininess: 50,
+            transparent: true,
+            opacity: 0
+         });
+
+         circtargetMesh = new THREE.Mesh(circtarget, circtargetMat)
+         sunTarget.add(circtargetMesh)
+         sunTarget.position.set(-250, 0, -250)
+         return sunMesh
+      }
       
       function createRammus(rammusParams) {
          var rammus = new THREE.Object3D();
@@ -498,6 +536,9 @@
       
       var turret = createTurret(turretParams);
       scene.add(turret);
+
+      var sun = createSun()
+      scene.add(sun)
       
       var camera = setupCamera(cameraParams);
       
@@ -547,6 +588,18 @@
                 case "g":
                     t = 0;
                     animate();
+                    break;
+                case "w":
+                    t = 0;
+                    //wave
+                    break;
+                case "t":
+                    //toggle ball form
+                    break;
+                case "c":
+                    t = 0;
+                    // crash into turret
+                    // roll back to starting position while turret shoots once
                     break;
                 case " ":
                     stopAnimation();
