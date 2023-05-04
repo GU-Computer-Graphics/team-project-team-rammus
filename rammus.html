@@ -364,10 +364,6 @@
 
       function moveRammusFoward() {
             t += 1;
-
-            console.log((t));
-            console.log((path[t].x + ", " + path[t].y + ", " + path[t].z));
-
             //get next point on the path of our bezier curve, we want to move towards it
             let targetDirection = new THREE.Vector3(path[t].x, path[t].y, path[t].z);
 
@@ -478,7 +474,7 @@
 
       function createSunTarget() {
          sunTarget = new THREE.Object3D();
-         circtarget = new THREE.SphereGeometry(100, 32, 32)
+         circtarget = new THREE.SphereGeometry(10, 32, 32)
          circtargetMat = new THREE.MeshPhongMaterial({
             color: 0xffffff, // yellow color
             specular: 0xffffff, // white specular 
@@ -603,8 +599,8 @@
       sun.position.set(sunParams.positionX,sunParams.positionY,sunParams.positionZ)
       scene.add(sun)
 
-      sunTarget = new THREE.Object3D()
-      targetsphere = createSunTarget()
+      let sunTarget = new THREE.Object3D()
+      let targetsphere = createSunTarget()
       sunTarget.add(targetsphere)
       sunTarget.position.set(sunParams.targetX,sunParams.targetY,sunParams.targetZ)
       scene.add(sunTarget)
