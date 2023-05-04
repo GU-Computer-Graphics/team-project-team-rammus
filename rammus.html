@@ -599,8 +599,6 @@
       shotStartingPosition.position.set(-turretParams.bodyWidth * 1.5, turretParams.jewelHeight + turretParams.bodyHeight, turretParams.bodyWidth);
       shot.position.set(shotStartingPosition.position.x, shotStartingPosition.position.y, shotStartingPosition.position.z);
 
-      var sun = createSun();
-      scene.add(sun);
       var sun = createSun()
       sun.position.set(sunParams.positionX,sunParams.positionY,sunParams.positionZ)
       scene.add(sun)
@@ -684,7 +682,6 @@
                     //toggle ball form
                     break;
                 case "c":
-                    t = 0;
                     // crash into turret
                     // roll back to starting position while turret shoots once
                     turretShot();
