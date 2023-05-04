@@ -356,7 +356,7 @@
          groundMesh.receiveShadow = true;
          
          // add ambient light source
-         var ambLight = new THREE.AmbientLight(new THREE.Color("white"), 0.3);
+         var ambLight = new THREE.AmbientLight(new THREE.Color("white"), 0.6);
          state.scene.add(ambLight);
          
          state.scene.add(groundMesh);
@@ -610,7 +610,7 @@
       scene.add(sunTarget)
 
 
-      var spotLight = new THREE.SpotLight();
+      var spotLight = new THREE.SpotLight(0xffffff, .5);
       spotLight.position.set(sunParams.positionX,sunParams.positionY,sunParams.positionZ);
       spotLight.target = sunTarget
       spotLight.castShadow = true;
