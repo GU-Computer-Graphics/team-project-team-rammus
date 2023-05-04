@@ -94,10 +94,13 @@
       }
 
       var sunParams = {
-         positionX: 250,
-         positionY: 300,
-         positionZ: 250,
-         radius: 100
+         positionX: 450,
+         positionY: 200,
+         positionZ: 450,
+         radius: 100,
+         targetX: -250,
+         targetY: 0,
+         targetZ: -250
       }
 
       // Animations Specific Varaibles
@@ -176,8 +179,13 @@
          
          // create meshes
          let headMesh = new THREE.Mesh(headGeom, turretMat);
+         headMesh.castShadow = true;
          let mastMesh = new THREE.Mesh(mastGeom, turretMastMat);
+         mastMesh.castShadow = true;
+         mastMesh.receiveShadow = true;
          let baseMesh = new THREE.Mesh(baseGeom, turretMat);
+         baseMesh.castShadow = true;
+         baseMesh.receiveShadow = true;
          
          // adjust positions
          headMesh.position.y += (p.bodyHeight * (1 + p.baseHeightRatio) + p.headSize * 0.3);
@@ -224,8 +232,10 @@
          
          // create meshes
          let topRightMesh = new THREE.Mesh(plateGeom, shieldMat);
+         topRightMesh.castShadow = true;
          let topLeftMesh = topRightMesh.clone();
          let midMesh = new THREE.Mesh(midGeom, midMat);
+         midMesh.castShadow = true;
          // adjust positions
          topLeftMesh.rotateY(1);
          midMesh.rotateY(0.5);
@@ -260,7 +270,7 @@
          let goldMat = new THREE.MeshPhongMaterial({
             color: new THREE.Color(0xFFD700),
             specular: new THREE.Color("white"),
-            shininess: 12,
+            shininess: 30,
             flatShading: THREE.FlatShading,
             side: THREE.DoubleSide
          });
@@ -268,23 +278,31 @@
          let jewelMat = new THREE.MeshPhongMaterial({
             color: new THREE.Color("red"),
             specular: new THREE.Color("white"),
-            shininess: 70,
+            shininess: 100,
             flatShading: THREE.FlatShading,
             side: THREE.DoubleSide
          });
 
          // Wand body meshs
          caneMesh = new THREE.Mesh(cane, wandMat)
+         caneMesh.castShadow = true;
+         caneMesh.receiveShadow = true;
          caneMesh.position.set(0, (p.bodyHeight*.75)/2, 0)
          topMesh = new THREE.Mesh(top, goldMat)
+         topMesh.castShadow = true;
+         topMesh.receiveShadow = true;
          topMesh.position.set(0, p.bodyHeight*.75, 0)
          bottomMesh = new THREE.Mesh(bottom, wandMat)
+         bottomMesh.castShadow = true;
+         bottom.receiveShadow = true;
          bottomMesh.position.set(0, (p.bodyHeight*.05)/2, 0)
 
          // Jewel Meshs
          topJewelMesh = new THREE.Mesh(topJewel, jewelMat)
+         topJewelMesh.castShadow = true;
          topJewelMesh.position.set(0, p.jewelHeight/2, 0)
          botJewelMesh = new THREE.Mesh(botJewel, jewelMat)
+         botJewel.castShadow = true;
          botJewelMesh.rotateX(deg2rad(180))
          
          // Add Wand Meshs
@@ -326,15 +344,17 @@
             new THREE.MeshPhongMaterial({
                 vertexColors: THREE.VertexColors,
                 specular: new THREE.Color("white"),
-                shininess: 10,
+                shininess: 30,
                 flatShading: THREE.FlatShading,
                 side: THREE.DoubleSide
                 //map: groundTexture //TODO: can temporarily comment out to see without local server
             }));
          groundMesh.rotateX(deg2rad(90));
+         groundMesh.translateY(-1)
+         groundMesh.receiveShadow = true;
          
          // add ambient light source
-         var ambLight = new THREE.AmbientLight(new THREE.Color("white"), 0.9);
+         var ambLight = new THREE.AmbientLight(new THREE.Color("white"), 0.3);
          state.scene.add(ambLight);
          
          state.scene.add(groundMesh);
@@ -418,11 +438,11 @@
             transparent: true,
             opacity: 0.5
          });
-
-
          sunMesh = new THREE.Mesh(sun, sunMat)
-         sunMesh.position.set(250, 300, 250)
-         sunObj.add(sunMesh)
+         return sunMesh
+      }
+
+      function createSunTarget() {
          sunTarget = new THREE.Object3D();
          circtarget = new THREE.SphereGeometry(100, 32, 32)
          circtargetMat = new THREE.MeshPhongMaterial({
@@ -430,13 +450,13 @@
             specular: 0xffffff, // white specular 
             shininess: 50,
             transparent: true,
-            opacity: 0
+            opacity: 0.5
          });
 
          circtargetMesh = new THREE.Mesh(circtarget, circtargetMat)
          sunTarget.add(circtargetMesh)
-         sunTarget.position.set(-250, 0, -250)
-         return sunMesh
+         sunTarget.position.set(0,0,0)
+         return sunTarget
       }
       
       function createRammus(rammusParams) {
@@ -444,6 +464,8 @@
          
          var taurGeom = new THREE.TorusGeometry( rammusParams.height, rammusParams.width, 16, 100 );
          var taurMesh = new THREE.Mesh(taurGeom, new THREE.MeshPhongMaterial( { color: 0xB2B200 } ));
+         taurMesh.castShadow = true;
+         taurMesh.receiveShadow = true;
          taurMesh.rotation.y = deg2rad(90);
          taurMesh.translateY(rammusParams.height);
          
@@ -502,6 +524,7 @@
       
       // construct a renderer for the scene
       var renderer = new THREE.WebGLRenderer();
+      renderer.shadowMap.enabled = true;
       
       // create the Scene object
       var scene = new THREE.Scene();
@@ -538,7 +561,26 @@
       scene.add(turret);
 
       var sun = createSun()
+      sun.position.set(sunParams.positionX,sunParams.positionY,sunParams.positionZ)
       scene.add(sun)
+
+      sunTarget = new THREE.Object3D()
+      targetsphere = createSunTarget()
+      sunTarget.add(targetsphere)
+      sunTarget.position.set(sunParams.targetX,sunParams.targetY,sunParams.targetZ)
+      scene.add(sunTarget)
+
+
+      var spotLight = new THREE.SpotLight();
+      spotLight.position.set(sunParams.positionX,sunParams.positionY,sunParams.positionZ);
+      spotLight.target = sunTarget
+      spotLight.castShadow = true;
+      spotLight.shadow.mapSize.width = 2048;
+      spotLight.shadow.mapSize.height = 2048;
+      spotLight.shadow.camera.near = 0.5; 
+      spotLight.shadow.camera.far = 700; 
+      scene.add(spotLight);
+
       
       var camera = setupCamera(cameraParams);
       
