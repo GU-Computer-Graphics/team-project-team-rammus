@@ -106,6 +106,8 @@
       var tMax = 1000; 
       var t = 0;   
       var startingPosition = new THREE.Object3D();
+      var shotStartingPosition = new THREE.Object3D();
+      var shotFrame = 0;
 
       var animationId = null;
       var controlPoints = [
@@ -359,6 +361,38 @@
             render(); //update scene
       }
 
+      function turretShot() {
+            
+         if(shot){
+            scene.remove(shot);
+         }
+         
+         shot.lookAt(rammus.position);
+         shot.translateZ(10);
+         scene.add(shot);
+
+         shotFrame += 1;
+         
+         if(shotFrame == 28){
+            shot.position.set(shotStartingPosition.position.x, shotStartingPosition.position.y, shotStartingPosition.position.z);
+            scene.remove(shot);
+            shotFrame = 0;
+         }
+
+         render(); //update scene
+      }
+      
+      function createShot(){
+         var shotObj = new THREE.Object3D();
+         var shotMesh = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 16), new THREE.MeshPhongMaterial({color: new THREE.Color("red"), transparent: true, opacity: .25}));
+         var shotLight = new THREE.PointLight(new THREE.Color("red"), 1, 100);
+
+         shotObj.add(shotMesh);
+         shotObj.add(shotLight);
+
+         return shotObj;
+      }
+
       function animate(timestamp) {
             if(t < tMax) {
                 moveRammusFoward();
@@ -537,8 +571,13 @@
       var turret = createTurret(turretParams);
       scene.add(turret);
 
-      var sun = createSun()
-      scene.add(sun)
+      var shot = createShot();
+
+      shotStartingPosition.position.set(-turretParams.bodyWidth * 1.5, turretParams.jewelHeight + turretParams.bodyHeight, turretParams.bodyWidth);
+      shot.position.set(shotStartingPosition.position.x, shotStartingPosition.position.y, shotStartingPosition.position.z);
+
+      var sun = createSun();
+      scene.add(sun);
       
       var camera = setupCamera(cameraParams);
       
@@ -565,12 +604,14 @@
                     cameraParams.eyeY = 100;
                     cameraParams.eyeZ = 200;
                     redoCamera();
+                    setupCameraControls();
                     break;
                 case "2":
                     cameraParams.eyeX = 0;
                     cameraParams.eyeY = 30;
                     cameraParams.eyeZ = -300;
                     redoCamera();
+                    setupCameraControls();
                     break;
 
                 case "3":
@@ -578,12 +619,14 @@
                     cameraParams.eyeY = 60;
                     cameraParams.eyeZ = 300;
                     redoCamera();
+                    setupCameraControls();
                     break;
                 case "4":
                     cameraParams.eyeX = 250;
                     cameraParams.eyeY = 260;
                     cameraParams.eyeZ = 0;
                     redoCamera();
+                    setupCameraControls();
                     break;
                 case "g":
                     t = 0;
@@ -600,6 +643,7 @@
                     t = 0;
                     // crash into turret
                     // roll back to starting position while turret shoots once
+                    turretShot();
                     break;
                 case " ":
                     stopAnimation();
@@ -612,7 +656,6 @@
                 default:
                     break;
             }
-            setupCameraControls();
             render();
         });
 
