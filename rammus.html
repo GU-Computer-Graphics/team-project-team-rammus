@@ -91,14 +91,11 @@
          positionZ: -200,
          height: 16,
          width: 14,
-<<<<<<< Updated upstream
          rotationX: 0,
-         rotationZ: 0
-=======
+         rotationZ: 0,
          
          radius: 30,
          shellColor: 0xB2B200
->>>>>>> Stashed changes
       }
 
       var sunParams = {
@@ -503,26 +500,23 @@
          let rp = rammusParams;
          
          var rammus = new THREE.Object3D();
-<<<<<<< Updated upstream
          var coneMesh = new THREE.Mesh(new THREE.ConeGeometry( 5,20,32 ),new THREE.MeshPhongMaterial( { color: 0xB2B200 } ))
          coneMesh.position.set(0,46,0)
          var taurGeom = new THREE.TorusGeometry( rammusParams.height, rammusParams.width, 16, 100 );
          var taurMesh = new THREE.Mesh(taurGeom, new THREE.MeshPhongMaterial( { color: 0xB2B200 } ));
-=======
          
          let rammusTopShell = new THREE.SphereGeometry(rp.radius,16,16,0,deg2rad(180));
-         let rammusTopShell = new THREE.SphereGeometry(rp.radius,16,16,180,deg2rad(180));
+         let rammusBottomShell = new THREE.SphereGeometry(rp.radius,16,16,deg2rad(180),deg2rad(180));
          
          //var taurGeom = new THREE.TorusGeometry( rammusParams.height, rammusParams.width, 16, 100 );
          let shellMat = new THREE.MeshLambertMaterial( { color: 0xB2B200, side: THREE.DoubleSide} );
          var taurMesh = new THREE.Mesh(rammusTopShell, shellMat);
          
->>>>>>> Stashed changes
          taurMesh.castShadow = true;
          taurMesh.receiveShadow = true;
          taurMesh.rotation.y = deg2rad(90);
          taurMesh.translateY(rammusParams.height);
-         rammus.add(coneMesh)
+         rammus.add(coneMesh);
          rammus.add(taurMesh);
          return rammus;
          
@@ -627,14 +621,12 @@
       sun.position.set(sunParams.positionX,sunParams.positionY,sunParams.positionZ)
       scene.add(sun)
 
-<<<<<<< Updated upstream
       let sunTarget = new THREE.Object3D()
       let targetsphere = createSunTarget()
       sunTarget.add(targetsphere)
-=======
+
       sunTarget = new THREE.Object3D()
       targetsphere = createSunTarget()
->>>>>>> Stashed changes
       sunTarget.position.set(sunParams.targetX,sunParams.targetY,sunParams.targetZ)
       scene.add(sunTarget)
 
@@ -647,11 +639,8 @@
       spotLight.shadow.mapSize.height = 2048;
       spotLight.shadow.camera.near = 0.5; 
       spotLight.shadow.camera.far = 1100; 
-<<<<<<< Updated upstream
-=======
      
       
->>>>>>> Stashed changes
       scene.add(spotLight);
       
       const helper = new THREE.CameraHelper(spotLight.shadow.camera);
