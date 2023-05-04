@@ -510,7 +510,10 @@
          spikeGeom.translate(0,rp.radius + (rp.spikeLength * 0.4), 0);
          var coneMesh = new THREE.Mesh(spikeGeom,new THREE.MeshPhongMaterial( { color: 0xB2B200 } ))
          coneMesh.translateY(rp.height);
+         coneMesh.castShadow = true;
+         coneMesh.receiveShadow = true;
          
+         //spikes on y plane
          var spike2Mesh = coneMesh.clone();
          spike2Mesh.rotateX(deg2rad(60));
          rammusTop.add(spike2Mesh);
@@ -530,6 +533,35 @@
          var spike6Mesh = coneMesh.clone();
          spike6Mesh.rotateX(deg2rad(300));
          rammusTop.add(spike6Mesh);
+
+         //spikes slanted to the upper left
+         var spike7Mesh = coneMesh.clone();
+         spike7Mesh.translateX(rp.radius/20)
+         spike7Mesh.translateY(-rp.height/5)
+         spike7Mesh.rotateZ(deg2rad(-40))
+         rammusTop.add(spike7Mesh)
+
+         //spikes slanted to the lower left
+         var spike8Mesh = coneMesh.clone();
+         spike8Mesh.translateX(-rp.radius/20)
+         spike8Mesh.translateY(rp.height/5)
+         spike8Mesh.rotateZ(deg2rad(-120))
+         rammusBot.add(spike8Mesh)
+
+         //spikes slanted to the lower right
+         var spike9Mesh = coneMesh.clone();
+         spike9Mesh.translateX(-rp.radius/20)
+         spike9Mesh.translateY(rp.height/5)
+         spike9Mesh.rotateZ(deg2rad(120))
+         rammusBot.add(spike9Mesh)
+
+         //spikes slanted to the upper right
+         var spike10Mesh = coneMesh.clone();
+         spike10Mesh.translateX(-rp.radius/20)
+         spike10Mesh.translateY(-rp.height/5)
+         spike10Mesh.rotateZ(deg2rad(40))
+         rammusTop.add(spike10Mesh)
+
          
          let rammusTopGeom = new THREE.SphereGeometry(rp.radius,16,16,0,deg2rad(180));
          rammusTopGeom.rotateY(deg2rad(180));
