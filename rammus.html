@@ -87,10 +87,12 @@
       
       var rammusParams = {
          positionX: 0,
-         positionY: 10,
+         positionY: 30,
          positionZ: -200,
          height: 16,
-         width: 14
+         width: 14,
+         rotationX: 0,
+         rotationZ: 0
       }
 
       var sunParams = {
@@ -114,10 +116,10 @@
 
       var animationId = null;
       var controlPoints = [
-         [0, 0,-200],
-         [500, 0, 200],
-         [-500, 0, 200],
-         [0, 0, -200]
+         [0, rammusParams.positionY,-200],
+         [500, rammusParams.positionY, 200],
+         [-500, rammusParams.positionY, 200],
+         [0, rammusParams.positionY, -200]
       ];
       
       
@@ -373,6 +375,9 @@
             // console.log("distance: " + distance);
             state.rammus.lookAt(targetDirection);
             state.rammus.translateZ(distance);
+            rammusParams.rotationX += deg2rad(1)
+            rammusParams.rotationZ += deg2rad(1)
+            rammus.rotateX(rammusParams.rotationX)
 
             render(); //update scene
       }
@@ -488,14 +493,15 @@
       
       function createRammus(rammusParams) {
          var rammus = new THREE.Object3D();
-         
+         var coneMesh = new THREE.Mesh(new THREE.ConeGeometry( 5,20,32 ),new THREE.MeshPhongMaterial( { color: 0xB2B200 } ))
+         coneMesh.position.set(0,46,0)
          var taurGeom = new THREE.TorusGeometry( rammusParams.height, rammusParams.width, 16, 100 );
          var taurMesh = new THREE.Mesh(taurGeom, new THREE.MeshPhongMaterial( { color: 0xB2B200 } ));
          taurMesh.castShadow = true;
          taurMesh.receiveShadow = true;
          taurMesh.rotation.y = deg2rad(90);
          taurMesh.translateY(rammusParams.height);
-         
+         rammus.add(coneMesh)
          rammus.add(taurMesh);
          return rammus;
       }
@@ -610,7 +616,7 @@
       spotLight.shadow.mapSize.width = 2048;
       spotLight.shadow.mapSize.height = 2048;
       spotLight.shadow.camera.near = 0.5; 
-      spotLight.shadow.camera.far = 700; 
+      spotLight.shadow.camera.far = 1100; 
       scene.add(spotLight);
 
       
