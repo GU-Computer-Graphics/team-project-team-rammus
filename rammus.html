@@ -94,8 +94,11 @@
          rotationX: 0,
          rotationZ: 0,
          
-         radius: 30,
-         shellColor: 0xB2B200
+         radius: 20,
+         shellColor: 0xB2B200,
+         
+         spikeLength: 15,
+         spikeWidth: 4
       }
 
       var sunParams = {
@@ -499,30 +502,66 @@
          // use alias
          let rp = rammusParams;
          
-         var rammus = new THREE.Object3D();
-         var coneMesh = new THREE.Mesh(new THREE.ConeGeometry( 5,20,32 ),new THREE.MeshPhongMaterial( { color: 0xB2B200 } ))
-         coneMesh.position.set(0,46,0)
-         var taurGeom = new THREE.TorusGeometry( rammusParams.height, rammusParams.width, 16, 100 );
-         var taurMesh = new THREE.Mesh(taurGeom, new THREE.MeshPhongMaterial( { color: 0xB2B200 } ));
+         let rammus = new THREE.Object3D();
+         let rammusTop = new THREE.Object3D();
+         let rammusBot = new THREE.Object3D();
          
-         let rammusTopShell = new THREE.SphereGeometry(rp.radius,16,16,0,deg2rad(180));
-         let rammusBottomShell = new THREE.SphereGeometry(rp.radius,16,16,deg2rad(180),deg2rad(180));
+         var spikeGeom = new THREE.ConeGeometry( rp.spikeWidth,rp.spikeLength,32 );
+         spikeGeom.translate(0,rp.radius + (rp.spikeLength * 0.4), 0);
+         var coneMesh = new THREE.Mesh(spikeGeom,new THREE.MeshPhongMaterial( { color: 0xB2B200 } ))
+         coneMesh.translateY(rp.height);
          
-         //var taurGeom = new THREE.TorusGeometry( rammusParams.height, rammusParams.width, 16, 100 );
+         var spike2Mesh = coneMesh.clone();
+         spike2Mesh.rotateX(deg2rad(60));
+         rammusTop.add(spike2Mesh);
+         
+         var spike3Mesh = coneMesh.clone();
+         spike3Mesh.rotateX(deg2rad(120));
+         rammusBot.add(spike3Mesh);
+
+         var spike4Mesh = coneMesh.clone();
+         spike4Mesh.rotateX(deg2rad(180));
+         rammusBot.add(spike4Mesh);
+         
+         var spike5Mesh = coneMesh.clone();
+         spike5Mesh.rotateX(deg2rad(240));
+         rammusBot.add(spike5Mesh);
+         
+         var spike6Mesh = coneMesh.clone();
+         spike6Mesh.rotateX(deg2rad(300));
+         rammusTop.add(spike6Mesh);
+         
+         let rammusTopGeom = new THREE.SphereGeometry(rp.radius,16,16,0,deg2rad(180));
+         rammusTopGeom.rotateY(deg2rad(180));
+         rammusTopGeom.translate(0,rp.radius,0);
+
+         let rammusBotGeom = new THREE.SphereGeometry(rp.radius,16,16,0,deg2rad(180));
+         rammusBotGeom.rotateY(deg2rad(180));
+         rammusTopGeom.translate(0,-rp.radius,0);
+         
          let shellMat = new THREE.MeshLambertMaterial( { color: 0xB2B200, side: THREE.DoubleSide} );
-         var taurMesh = new THREE.Mesh(rammusTopShell, shellMat);
          
-         taurMesh.castShadow = true;
-         taurMesh.receiveShadow = true;
-         taurMesh.rotation.y = deg2rad(90);
-         taurMesh.translateY(rammusParams.height);
-         rammus.add(coneMesh);
-         rammus.add(taurMesh);
-         return rammus;
+         var topMesh = new THREE.Mesh(rammusTopGeom, shellMat);
+         var botMesh = new THREE.Mesh(rammusBotGeom, shellMat);
          
+         topMesh.castShadow = true;
+         topMesh.receiveShadow = true;
+         topMesh.translateY(rp.height);
+         topMesh.rotateX(deg2rad(90));
          
+         botMesh.castShadow = true;
+         botMesh.receiveShadow = true;
+         botMesh.translateY(rp.height);
+         botMesh.rotateX(deg2rad(-90));
          
+         rammusTop.add(coneMesh);
+         rammusTop.add(topMesh);
          
+         rammusBot.add(botMesh);
+         
+         rammus.add(rammusTop);
+         rammus.add(rammusBot);
+         return rammus;         
       }
 
       // setupCamera() function creates and returns a camera with the desired parameters
@@ -607,7 +646,7 @@
          linewidth: 3
       });
       var curve = new THREE.Line(curveGeom, curveMat);
-      scene.add(curve);
+      //scene.add(curve);
       
       var turret = createTurret(turretParams);
       scene.add(turret);
