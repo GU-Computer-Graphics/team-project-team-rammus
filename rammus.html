@@ -473,7 +473,6 @@
       }
 
       function createSunTarget() {
-         sunTarget = new THREE.Object3D();
          circtarget = new THREE.SphereGeometry(10, 32, 32)
          circtargetMat = new THREE.MeshPhongMaterial({
             color: 0xffffff, // yellow color
@@ -484,9 +483,7 @@
          });
 
          circtargetMesh = new THREE.Mesh(circtarget, circtargetMat)
-         sunTarget.add(circtargetMesh)
-         sunTarget.position.set(0,0,0)
-         return sunTarget
+         return circtargetMesh
       }
       
       function createRammus(rammusParams) {
