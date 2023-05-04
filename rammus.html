@@ -578,7 +578,7 @@
       state.rammus = rammus;     // save this so animation can use it
       startingPosition.position.copy(rammus.position);
       rammus.position.x = rammusParams.positionX;
-      rammus.position.y = rammusParams.positionY;
+      rammus.position.y = rammusParams.positionY - rammusParams.height;
       rammus.position.z = rammusParams.positionZ;
       scene.add(rammus);
 
