@@ -119,6 +119,8 @@
       var startingPosition = new THREE.Object3D();
       var shotStartingPosition = new THREE.Object3D();
       var shotFrame = 0;
+      var shot = createShot();
+
 
       var animationId = null;
       var controlPoints = [
@@ -146,7 +148,7 @@
          let body = createBody(turretParams);
          let shield = createShield(turretParams);
          let wand = createWand(turretParams);
-         wand.position.set(-turretParams.bodyWidth * 1.5, turretParams.bodyHeight *.25, turretParams.bodyWidth)
+         wand.position.set(-turretParams.bodyWidth * 1.5, turretParams.bodyHeight *.25, turretParams.bodyWidth);
          
          // add the parts to the whole
          turret.add(body);
@@ -155,6 +157,9 @@
          
          // adjust whole
          // TODO: POSITION, ROTATION, SIZE SCALING, ETC
+         shotStartingPosition.position.set(-turretParams.bodyWidth * 1.5, turretParams.jewelHeight + turretParams.bodyHeight, turretParams.bodyWidth);
+         shot.position.set(shotStartingPosition.position.x, shotStartingPosition.position.y, shotStartingPosition.position.z);
+         scene.remove(shot);
          
          return turret;
       }
@@ -682,28 +687,23 @@
       var turret = createTurret(turretParams);
       scene.add(turret);
 
-      var shot = createShot();
+      var sun = createSun();
+      sun.position.set(sunParams.positionX,sunParams.positionY,sunParams.positionZ);
+      scene.add(sun);
 
-      shotStartingPosition.position.set(-turretParams.bodyWidth * 1.5, turretParams.jewelHeight + turretParams.bodyHeight, turretParams.bodyWidth);
-      shot.position.set(shotStartingPosition.position.x, shotStartingPosition.position.y, shotStartingPosition.position.z);
-
-      var sun = createSun()
-      sun.position.set(sunParams.positionX,sunParams.positionY,sunParams.positionZ)
-      scene.add(sun)
-
-      let sunTarget = new THREE.Object3D()
-      let targetsphere = createSunTarget()
+      let sunTarget = new THREE.Object3D();
+      let targetsphere = createSunTarget();
       sunTarget.add(targetsphere)
 
-      sunTarget = new THREE.Object3D()
-      targetsphere = createSunTarget()
-      sunTarget.position.set(sunParams.targetX,sunParams.targetY,sunParams.targetZ)
-      scene.add(sunTarget)
+      sunTarget = new THREE.Object3D();
+      targetsphere = createSunTarget();
+      sunTarget.position.set(sunParams.targetX,sunParams.targetY,sunParams.targetZ);
+      scene.add(sunTarget);
 
 
       var spotLight = new THREE.SpotLight(0xffffff, .5);
       spotLight.position.set(sunParams.positionX,sunParams.positionY,sunParams.positionZ);
-      spotLight.target = sunTarget
+      spotLight.target = sunTarget;
       spotLight.castShadow = true;
       spotLight.shadow.mapSize.width = 2048;
       spotLight.shadow.mapSize.height = 2048;

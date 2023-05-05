@@ -1,3 +1,5 @@
+Pages URL: https://gu-computer-graphics.github.io/team-project-team-rammus/
+
 Our team's scene contains Rammus, a character from League of Legends, and a turret from the same game on a flat plane with a sun. 
 Rammus can roll around said turret with a button press(G) and the turret can shoot at him(C).
 
@@ -19,3 +21,9 @@ User Interaction: There are multiple ways for the user to interact...
 - a GUI to change turret size...
 - ...and the ability to change the camera location with 1-4.
 - Hold C to have the turret shoot at Rammus.
+
+---------------------
+Resources Used
+---------------------
+
+Three.JS: https://threejs.org/
